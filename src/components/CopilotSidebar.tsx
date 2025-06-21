@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, Send, X, CheckCircle, Undo } from 'lucide-react';
 import { useParameterStore } from '../store/useParameterStore';
-import { deepSeekChat } from '../lib/deepseek';
 import { PendingChanges } from './PendingChanges';
 import { useToast } from '@/hooks/use-toast';
 
@@ -48,39 +47,18 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({ open, onToggle }
     setInput('');
     setIsLoading(true);
 
-    try {
-      const response = await deepSeekChat({
-        hierarchy,
-        parameters,
-        calculations,
-        patches
-      }, input);
-
+    // Simulate AI response (placeholder for DeepSeek integration)
+    setTimeout(() => {
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: response.answer,
+        content: "I'm ready to help with your configuration! The DeepSeek AI integration will be added later. For now, you can manually configure parameters and calculations using the grids.",
         timestamp: new Date(),
-        patches: response.patch
       };
 
       setMessages(prev => [...prev, assistantMessage]);
-
-      if (response.patch && response.patch.length > 0) {
-        toast({
-          title: "Suggestions Available",
-          description: response.descriptionDraft || "The AI has suggested some changes",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to get response from AI assistant",
-        variant: "destructive"
-      });
-    } finally {
       setIsLoading(false);
-    }
+    }, 1000);
   };
 
   const handleApplyPatches = (patches: any[]) => {
@@ -118,7 +96,7 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({ open, onToggle }
             <div className="flex items-center space-x-2">
               <MessageCircle className="h-5 w-5" />
               <h3 className="font-semibold">AI Copilot</h3>
-              <Badge variant="secondary" className="text-xs">Beta</Badge>
+              <Badge variant="secondary" className="text-xs">Coming Soon</Badge>
             </div>
             <div className="flex space-x-2">
               <Button
@@ -157,7 +135,7 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({ open, onToggle }
                   <CardContent className="p-4 text-center">
                     <MessageCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
                     <p className="text-sm text-muted-foreground">
-                      Ask me anything about your configuration. I can help optimize parameters and create calculations.
+                      AI Copilot will be integrated with DeepSeek. For now, use the parameter and calculation grids to configure your system.
                     </p>
                   </CardContent>
                 </Card>
@@ -212,7 +190,7 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({ open, onToggle }
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask about your configuration..."
+                placeholder="AI integration coming soon..."
                 onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
                 disabled={isLoading}
               />
