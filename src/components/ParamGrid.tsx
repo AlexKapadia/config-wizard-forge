@@ -50,7 +50,7 @@ export const ParamGrid: React.FC = () => {
                   key={param.id}
                   className={`${
                     isOverridden(param)
-                      ? 'bg-yellow-100 dark:bg-yellow-900/20 animate-flash-lime'
+                      ? 'bg-yellow-100 dark:bg-yellow-900/20 animate-pulse'
                       : ''
                   }`}
                   layout
