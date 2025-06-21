@@ -13,8 +13,13 @@ export const Step5: React.FC = () => {
   const [copilotOpen, setCopilotOpen] = React.useState(false);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-6 h-full flex flex-col"
+    >
+      <div className="flex items-center justify-between sticky top-0 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 z-10 pb-4">
         <div>
           <h2 className="text-2xl font-bold mb-2">Product Builder</h2>
           <p className="text-muted-foreground">
@@ -30,12 +35,8 @@ export const Step5: React.FC = () => {
         </Button>
       </div>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-      >
-        <Tabs defaultValue="parameters" className="w-full">
+      <div className="flex-1">
+        <Tabs defaultValue="parameters" className="w-full h-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="parameters">Parameters</TabsTrigger>
             <TabsTrigger value="calculations">Calculations</TabsTrigger>
@@ -49,7 +50,7 @@ export const Step5: React.FC = () => {
             <CalcGrid />
           </TabsContent>
         </Tabs>
-      </motion.div>
+      </div>
 
       <StepFooter currentStep={5} />
 
@@ -57,6 +58,6 @@ export const Step5: React.FC = () => {
         open={copilotOpen}
         onToggle={() => setCopilotOpen(!copilotOpen)}
       />
-    </div>
+    </motion.div>
   );
 };

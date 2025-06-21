@@ -1,9 +1,91 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { evaluate } from 'mathjs';
 import { Parameter, Calculation, Patch, Hierarchy } from '../types';
 import { sampleParameters } from '../data/fixtures';
+import { tcoParameters } from '../data/tco-parameters';
+
+// Level-specific calculation templates
+const levelCalculations = {
+  1: [ // Industry level - TCO calculations (generic across all industries)
+    {
+      id: 'tco-capex',
+      name: 'Total CAPEX',
+      formula: 'equipment_cost + installation_cost + commissioning_cost',
+      units: '$',
+      description: 'Total Capital Expenditure for the system'
+    },
+    {
+      id: 'tco-opex-annual',
+      name: 'Annual OPEX',
+      formula: 'energy_cost + maintenance_cost + labor_cost',
+      units: '$/year',
+      description: 'Annual Operating Expenditure'
+    },
+    {
+      id: 'tco-total-5yr',
+      name: '5-Year TCO',
+      formula: 'tco-capex + (tco-opex-annual * 5)',
+      units: '$',
+      description: 'Total Cost of Ownership over 5 years'
+    },
+    {
+      id: 'tco-payback',
+      name: 'Payback Period',
+      formula: 'tco-capex / annual_savings',
+      units: 'years',
+      description: 'Time to recover initial investment'
+    }
+  ],
+  2: [ // Technology level - Performance calculations
+    {
+      id: 'efficiency-overall',
+      name: 'Overall Efficiency',
+      formula: 'useful_output / total_input * 100',
+      units: '%',
+      description: 'Overall system efficiency percentage'
+    },
+    {
+      id: 'capacity-utilization',
+      name: 'Capacity Utilization',
+      formula: 'actual_output / rated_capacity * 100',
+      units: '%',
+      description: 'How much of rated capacity is being used'
+    }
+  ],
+  3: [ // Solution level - Operational calculations
+    {
+      id: 'throughput-rate',
+      name: 'Throughput Rate',
+      formula: 'total_volume / operating_hours',
+      units: 'units/hr',
+      description: 'Rate of processing or production'
+    },
+    {
+      id: 'availability-factor',
+      name: 'Availability Factor',
+      formula: 'uptime_hours / total_hours * 100',
+      units: '%',
+      description: 'System availability percentage'
+    }
+  ],
+  4: [ // Variant level - Specific performance metrics
+    {
+      id: 'power-density',
+      name: 'Power Density',
+      formula: 'total_power / floor_area',
+      units: 'kW/m²',
+      description: 'Power consumption per unit area'
+    },
+    {
+      id: 'cooling-efficiency',
+      name: 'Cooling Efficiency',
+      formula: 'cooling_load / power_consumption',
+      units: 'kW/kW',
+      description: 'Cooling delivered per unit power consumed'
+    }
+  ]
+};
 
 interface ParameterStoreState {
   hierarchy: Hierarchy;
@@ -30,7 +112,7 @@ export const useParameterStore = create<ParameterStoreState>()(
   persist(
     (set, get) => ({
       hierarchy: {},
-      parameters: sampleParameters,
+      parameters: [...sampleParameters, ...tcoParameters],
       calculations: [],
       patches: [],
       currentStep: 1,
@@ -44,8 +126,33 @@ export const useParameterStore = create<ParameterStoreState>()(
           if (level === 3) newHierarchy.solutionId = id;
           if (level === 4) newHierarchy.variantId = id;
           
-          return { hierarchy: newHierarchy };
+          // Add level-specific calculations
+          const newCalculations = [...state.calculations];
+          const levelCalcs = levelCalculations[level as keyof typeof levelCalculations] || [];
+          
+          // Remove existing calculations for this level and higher levels
+          const filteredCalculations = newCalculations.filter(calc => {
+            const calcLevel = Object.keys(levelCalculations).find(l => 
+              levelCalculations[l as keyof typeof levelCalculations].some(lc => lc.id === calc.id)
+            );
+            return !calcLevel || parseInt(calcLevel) < level;
+          });
+          
+          // Add new calculations for selected level
+          levelCalcs.forEach(calc => {
+            if (!filteredCalculations.some(existing => existing.id === calc.id)) {
+              filteredCalculations.push({ ...calc });
+            }
+          });
+          
+          return { 
+            hierarchy: newHierarchy,
+            calculations: filteredCalculations
+          };
         });
+        
+        // Trigger recalculation
+        get().recalc();
       },
 
       applyPatch: (patch: Patch | Patch[]) => {
@@ -111,6 +218,13 @@ export const useParameterStore = create<ParameterStoreState>()(
               state.parameters.forEach(param => {
                 const value = param.value ?? param.defaultValue ?? 0;
                 formula = formula.replace(new RegExp(param.id, 'g'), value.toString());
+              });
+              
+              // Replace calculation references with their values
+              state.calculations.forEach(otherCalc => {
+                if (otherCalc.id !== calc.id && otherCalc.value !== undefined) {
+                  formula = formula.replace(new RegExp(otherCalc.id, 'g'), otherCalc.value.toString());
+                }
               });
               
               const result = evaluate(formula);
