@@ -6,7 +6,7 @@ import { sampleParameters } from '../data/fixtures';
 import { tcoParameters } from '../data/tco-parameters';
 
 // Level-specific calculation templates
-const levelCalculations = {
+const levelCalculations: Record<1 | 2 | 3 | 4, Array<Omit<Calculation, 'value'>>> = {
   1: [ // Industry level - TCO calculations (generic across all industries)
     {
       id: 'tco-capex',
@@ -128,12 +128,13 @@ export const useParameterStore = create<ParameterStoreState>()(
           
           // Add level-specific calculations
           const newCalculations = [...state.calculations];
-          const levelCalcs = levelCalculations[level as keyof typeof levelCalculations] || [];
+          const levelKey = level as 1 | 2 | 3 | 4;
+          const levelCalcs = levelCalculations[levelKey] || [];
           
           // Remove existing calculations for this level and higher levels
           const filteredCalculations = newCalculations.filter(calc => {
             const calcLevel = Object.keys(levelCalculations).find(l => 
-              levelCalculations[l as keyof typeof levelCalculations].some(lc => lc.id === calc.id)
+              levelCalculations[parseInt(l) as 1 | 2 | 3 | 4].some(lc => lc.id === calc.id)
             );
             return !calcLevel || parseInt(calcLevel) < level;
           });

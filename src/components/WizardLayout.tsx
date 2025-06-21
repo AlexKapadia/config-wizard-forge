@@ -18,16 +18,44 @@ export const WizardLayout: React.FC = () => {
   const navigate = useNavigate();
   const { step } = useParams();
   const currentStep = parseInt(step || '1');
-  const { setCurrentStep } = useParameterStore();
+  const { setCurrentStep, hierarchy } = useParameterStore();
 
   React.useEffect(() => {
     setCurrentStep(currentStep);
   }, [currentStep, setCurrentStep]);
 
   const handleStepClick = (stepId: number) => {
-    if (stepId <= currentStep) {
+    // Allow navigation to current step or any previous step
+    // Also allow navigation to next step if current step requirements are met
+    const canNavigate = stepId <= currentStep || (stepId === currentStep + 1 && isStepComplete(currentStep));
+    
+    if (canNavigate) {
       navigate(`/wizard/step/${stepId}`);
     }
+  };
+
+  const isStepComplete = (stepNumber: number) => {
+    switch (stepNumber) {
+      case 1:
+        return !!hierarchy.industryId;
+      case 2:
+        return !!hierarchy.technologyId;
+      case 3:
+        return !!hierarchy.solutionId;
+      case 4:
+        return !!hierarchy.variantId;
+      case 5:
+        return true; // Step 5 is always accessible once you reach it
+      default:
+        return false;
+    }
+  };
+
+  const getStepStatus = (stepId: number) => {
+    if (stepId < currentStep) return 'completed';
+    if (stepId === currentStep) return 'current';
+    if (stepId === currentStep + 1 && isStepComplete(currentStep)) return 'accessible';
+    return 'locked';
   };
 
   const progress = (currentStep / steps.length) * 100;
@@ -53,33 +81,43 @@ export const WizardLayout: React.FC = () => {
         <div className="mb-8">
           <Progress value={progress} className="h-2 mb-4" />
           <div className="flex justify-between">
-            {steps.map((stepData) => (
-              <button
-                key={stepData.id}
-                onClick={() => handleStepClick(stepData.id)}
-                className={`flex flex-col items-center space-y-2 p-3 rounded-lg transition-all ${
-                  stepData.id === currentStep
-                    ? 'bg-primary text-primary-foreground'
-                    : stepData.id < currentStep
-                    ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100 cursor-pointer hover:bg-green-200'
-                    : 'bg-slate-200 text-slate-500 cursor-not-allowed'
-                }`}
-              >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                  stepData.id === currentStep
-                    ? 'bg-white text-primary'
-                    : stepData.id < currentStep
-                    ? 'bg-green-500 text-white'
-                    : 'bg-slate-300 text-slate-500'
-                }`}>
-                  {stepData.id < currentStep ? '✓' : stepData.id}
-                </div>
-                <div className="text-center">
-                  <div className="font-medium text-sm">{stepData.name}</div>
-                  <div className="text-xs opacity-75">{stepData.description}</div>
-                </div>
-              </button>
-            ))}
+            {steps.map((stepData) => {
+              const status = getStepStatus(stepData.id);
+              const isClickable = status === 'completed' || status === 'current' || status === 'accessible';
+              
+              return (
+                <button
+                  key={stepData.id}
+                  onClick={() => handleStepClick(stepData.id)}
+                  disabled={!isClickable}
+                  className={`flex flex-col items-center space-y-2 p-3 rounded-lg transition-all ${
+                    status === 'current'
+                      ? 'bg-primary text-primary-foreground'
+                      : status === 'completed'
+                      ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100 cursor-pointer hover:bg-green-200 dark:hover:bg-green-700'
+                      : status === 'accessible'
+                      ? 'bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-200 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-800'
+                      : 'bg-slate-200 text-slate-500 cursor-not-allowed'
+                  }`}
+                >
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
+                    status === 'current'
+                      ? 'bg-white text-primary'
+                      : status === 'completed'
+                      ? 'bg-green-500 text-white'
+                      : status === 'accessible'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-slate-300 text-slate-500'
+                  }`}>
+                    {status === 'completed' ? '✓' : stepData.id}
+                  </div>
+                  <div className="text-center">
+                    <div className="font-medium text-sm">{stepData.name}</div>
+                    <div className="text-xs opacity-75">{stepData.description}</div>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
 
