@@ -1,13 +1,21 @@
 
 # Industrial Configuration Wizard
 
-A sophisticated React + TypeScript application for configuring industrial systems through a wizard-driven interface with AI-powered assistance.
+A sophisticated React + TypeScript application for configuring industrial systems through a wizard-driven interface with AI-powered assistance using DeepSeek API.
 
 ## 🚀 Quick Start
 
 ```bash
+# Clone the repository
+git clone https://github.com/AlexKapadia/config-wizard-forge.git
+cd config-wizard-forge
+
 # Install dependencies
 npm install
+
+# Set up environment variables
+cp env.example .env
+# Edit .env and add your DeepSeek API key
 
 # Start development server
 npm run dev
@@ -15,6 +23,29 @@ npm run dev
 # Build for production
 npm run build
 ```
+
+## 🔧 Environment Setup
+
+Create a `.env` file in the root directory with your DeepSeek API configuration:
+
+```env
+# DeepSeek API Configuration
+VITE_DEEPSEEK_API_KEY=your_deepseek_api_key_here
+VITE_DEEPSEEK_BASE_URL=https://api.deepseek.com
+VITE_DEEPSEEK_MODEL=deepseek-chat
+
+# Application Configuration
+VITE_APP_NAME=Industrial Configuration Wizard
+VITE_APP_VERSION=1.0.0
+```
+
+### Getting Your DeepSeek API Key
+
+1. Visit [DeepSeek Console](https://platform.deepseek.com/)
+2. Sign up or log in to your account
+3. Navigate to API Keys section
+4. Create a new API key
+5. Copy the key and paste it in your `.env` file
 
 ## 🏗️ Architecture
 
@@ -26,7 +57,7 @@ npm run build
 - **State Management**: Zustand with persistence
 - **Animations**: Framer Motion
 - **Formulas**: mathjs for safe evaluation
-- **AI Integration**: Ready for DeepSeek API integration
+- **AI Integration**: DeepSeek API with real-time chat
 
 ### Application Flow
 
@@ -40,7 +71,7 @@ graph TD
     
     E --> G[Parameters Grid]
     E --> H[Calculations Grid]
-    E --> I[AI Copilot - Coming Soon]
+    E --> I[AI Copilot - DeepSeek]
     
     I --> J[Pending Changes]
     J --> K[Apply Changes]
@@ -58,12 +89,18 @@ graph TD
    - **Calculations Tab**: Formula builder with mathjs evaluation
    - Live parameter overrides with visual feedback
 
-3. **Advanced State Management**
+3. **AI Copilot Integration**
+   - **DeepSeek API**: Real-time AI assistance
+   - **Context-Aware**: Analyzes current configuration
+   - **Smart Suggestions**: Parameter optimizations and calculations
+   - **Patch System**: Apply AI suggestions with validation
+
+4. **Advanced State Management**
    - Zustand store with localStorage persistence
    - Patch-based updates for undo/redo
    - Real-time calculation engine
 
-4. **Modern UI/UX**
+5. **Modern UI/UX**
    - Glass morphism design
    - Dark mode support
    - Smooth animations with Framer Motion
@@ -79,7 +116,7 @@ src/
 │   ├── ParamGrid.tsx        # Parameters table
 │   ├── CalcGrid.tsx         # Calculations table
 │   ├── CalcBuilderModal.tsx # Formula editor
-│   ├── CopilotSidebar.tsx   # AI assistant (UI ready)
+│   ├── CopilotSidebar.tsx   # AI assistant (DeepSeek)
 │   ├── PendingChanges.tsx   # Change management
 │   ├── VisualSummary.tsx    # Configuration overview
 │   └── StepFooter.tsx       # Navigation controls
@@ -92,72 +129,64 @@ src/
 ├── store/                # State management
 │   └── useParameterStore.ts # Zustand store
 ├── lib/                  # Utilities
-│   └── deepseek.ts          # AI API adapter (placeholder)
+│   └── deepseek.ts          # DeepSeek API adapter
 ├── data/                 # Static data
 │   └── fixtures.ts          # Sample configurations
 └── types/                # TypeScript definitions
     └── index.ts             # Core interfaces
 ```
 
-## 🛠️ What's Missing - Implementation Needed
+## 🤖 AI Copilot Features
 
-### 1. AI Integration (Priority: High)
-- **DeepSeek API Integration**: Replace mock implementation in `src/lib/deepseek.ts`
-- **API Key Configuration**: Set up environment variables
-- **Context-Aware Suggestions**: Implement parameter and calculation recommendations
-- **Formula Optimization**: AI-powered formula improvements
+### DeepSeek Integration
+The AI Copilot uses DeepSeek's advanced language model to provide intelligent assistance:
 
-### 2. Backend Integration (Priority: Medium)
-- **Data Persistence**: Save configurations to database
-- **User Management**: Authentication and user sessions
-- **Configuration Sharing**: Export/import functionality
-- **Audit Trail**: Track changes and versions
+- **Context Analysis**: Understands your current configuration
+- **Parameter Optimization**: Suggests improvements based on industry best practices
+- **Calculation Generation**: Creates relevant formulas automatically
+- **Technical Guidance**: Provides expert advice for industrial systems
 
-### 3. Testing Suite (Priority: Medium)
-- **Unit Tests**: Component testing with Jest/React Testing Library
-- **Integration Tests**: Wizard flow and state management
-- **E2E Tests**: Complete user journey testing
+### Usage Examples
+```
+User: "Optimize the cooling efficiency"
+AI: Analyzes current parameters and suggests:
+- Adjust air flow rate for better heat transfer
+- Optimize temperature setpoints
+- Create efficiency calculation
 
-### 4. Advanced Features (Priority: Low)
-- **Real-time Collaboration**: Multiple users editing same config
-- **Advanced Validations**: Cross-parameter validation rules
-- **Calculation Dependencies**: Complex formula relationships
-- **Export Formats**: PDF, Excel, CSV export options
+User: "Create a TCO calculation"
+AI: Generates comprehensive TCO formula:
+- Total CAPEX + (Annual OPEX × 5 years)
+- Includes equipment, installation, energy costs
+- Calculates payback period
 
-## 🤖 AI Integration Setup
-
-The application includes a placeholder DeepSeek adapter in `src/lib/deepseek.ts`. To integrate:
-
-### Required Environment Variables
-```env
-VITE_DEEPSEEK_API_KEY=your_api_key_here
-VITE_DEEPSEEK_BASE_URL=https://api.deepseek.com
+User: "Suggest parameter improvements"
+AI: Reviews current values and suggests:
+- Industry-standard ranges
+- Energy efficiency optimizations
+- Cost-saving recommendations
 ```
 
-### Implementation Steps
-1. **Replace Mock Function**: Update `deepSeekChat` function with actual API calls
-2. **Error Handling**: Add proper error handling and rate limiting
-3. **System Prompts**: Configure AI prompts for industrial context
-4. **Patch Generation**: Implement proper patch creation from AI responses
+### Keyboard Shortcuts
+- `Ctrl + /`: Toggle AI Copilot sidebar
+- `Enter`: Send message
+- `Shift + Enter`: New line in chat
 
-### Expected AI Capabilities
-- Context-aware parameter suggestions
-- Automatic calculation generation
-- Formula optimization recommendations
-- Validation and error detection
+## 🛠️ Development
 
-## 🎨 Design System
+### Key Commands
+```bash
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run preview      # Preview production build
+npm run lint         # Run ESLint
+```
 
-### Color Palette
-- **Glass Effect**: `backdrop-blur-md bg-white/30 dark:bg-slate-800/30`
-- **Primary**: HSL-based color system with dark mode support
-- **Animations**: Pulse effect for parameter overrides
-
-### Animation Patterns
-- **Page Transitions**: Fade in with slide up
-- **Sidebar**: Slide from right with spring animation
-- **Parameter Changes**: Pulse animation for overrides
-- **Loading States**: Spin animation
+### Performance Features
+- Route-based code splitting
+- Lazy loading for heavy components
+- Optimized re-renders with Zustand
+- Memoized calculations
 
 ## 📊 Data Models
 
@@ -202,20 +231,26 @@ The application is optimized for:
 - Progressive enhancement
 - Accessibility compliance
 
-## 🔍 Development
+## 🔍 Troubleshooting
 
-### Key Commands
-- `Ctrl + /`: Toggle AI Copilot
-- Hot reload enabled for all components
-- TypeScript strict mode for type safety
+### Common Issues
 
-### Performance Features
-- Route-based code splitting
-- Lazy loading for heavy components
-- Optimized re-renders with Zustand
-- Memoized calculations
+1. **DeepSeek API Errors**
+   - Verify your API key is correct
+   - Check API key permissions
+   - Ensure you have sufficient credits
 
-## 📋 Implementation Checklist
+2. **Formula Validation Errors**
+   - Check parameter references exist
+   - Verify mathematical syntax
+   - Ensure no circular dependencies
+
+3. **State Persistence Issues**
+   - Clear localStorage if needed
+   - Check browser storage limits
+   - Verify Zustand configuration
+
+## 📋 Implementation Status
 
 ### Frontend Complete ✅
 - [x] 5-step wizard navigation
@@ -227,14 +262,16 @@ The application is optimized for:
 - [x] State management with Zustand
 - [x] Route-based navigation
 - [x] Animation system
+- [x] DeepSeek AI integration
+- [x] Real-time chat functionality
+- [x] Patch validation system
 
-### Ready for Integration 🔄
-- [ ] DeepSeek AI API integration
-- [ ] Backend data persistence
-- [ ] User authentication
-- [ ] Test suite implementation
-- [ ] Production deployment setup
+### Ready for Production 🚀
+- [x] Environment configuration
+- [x] Error handling
+- [x] API integration
+- [x] User experience optimization
 
 ---
 
-Built with ❤️ using modern React patterns and best practices. Ready for AI and backend integration!
+Built with ❤️ using modern React patterns and DeepSeek AI. Ready for production deployment!

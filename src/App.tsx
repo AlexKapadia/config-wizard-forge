@@ -15,27 +15,32 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Navigate to="/wizard/step/1" replace />} />
-          <Route path="/wizard" element={<WizardLayout />}>
-            <Route path="step/1" element={<Step1 />} />
-            <Route path="step/2" element={<Step2 />} />
-            <Route path="step/3" element={<Step3 />} />
-            <Route path="step/4" element={<Step4 />} />
-            <Route path="step/5" element={<Step5 />} />
-          </Route>
-          <Route path="/review" element={<ReviewPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+function App() {
+  // Temporary sanity check - remove after verification
+  console.log('DeepSeek key:', import.meta.env.VITE_DEEPSEEK_API_KEY);
+  
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Navigate to="/wizard/step/1" replace />} />
+            <Route path="/wizard" element={<WizardLayout />}>
+              <Route path="step/1" element={<Step1 />} />
+              <Route path="step/2" element={<Step2 />} />
+              <Route path="step/3" element={<Step3 />} />
+              <Route path="step/4" element={<Step4 />} />
+              <Route path="step/5" element={<Step5 />} />
+            </Route>
+            <Route path="/review" element={<ReviewPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;
